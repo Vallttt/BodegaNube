@@ -1,0 +1,45 @@
+openapi: 3.0.3
+info:
+  title: ms-ordenes
+  description: Microservicio de órdenes de BodegaNube.
+  version: 0.0.1
+servers:
+  - url: /ordenes
+paths:
+  /:
+    get:
+      summary: Lista las órdenes del comercio autenticado.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Listado de órdenes.
+    post:
+      summary: Crea una orden a partir de un aviso de venta procesado (uso interno).
+      responses:
+        "201":
+          description: Orden creada.
+        "409":
+          description: Orden duplicada.
+  /{id}:
+    get:
+      summary: Consulta el estado de una orden del comercio autenticado.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Detalle de la orden.
+        "404":
+          description: Orden no encontrada.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
