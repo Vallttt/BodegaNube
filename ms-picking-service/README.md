@@ -6,8 +6,8 @@ Microservicio de picking y despacho de BodegaNube.
 
 - Java 21
 - Spring Boot
-- Spring Data JPA
-- PostgreSQL
+- Spring Data MongoDB
+- MongoDB
 
 ## Responsabilidad
 
@@ -35,14 +35,12 @@ OPERARIO
 
 ## Base de datos
 
-PostgreSQL (`ms_picking`).
+MongoDB (`ms_picking`).
 
 ## Variables de entorno
 
 ```env
-DB_URL=
-DB_USERNAME=
-DB_PASSWORD=
+MONGODB_URI=
 MS_ORDENES_URL=
 ```
 

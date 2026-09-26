@@ -1,0 +1,66 @@
+@startuml BodegaNube_Arquitectura
+!theme plain
+skinparam componentStyle rectangle
+skinparam backgroundColor transparent
+skinparam defaultTextAlignment center
+skinparam roundCorner 10
+skinparam linetype ortho
+
+skinparam component {
+  BackgroundColor<<aws>> #FF990022
+  BorderColor<<aws>> #D2691E
+}
+skinparam database {
+  BackgroundColor #E6F1FB
+  BorderColor #378ADD
+}
+skinparam queue {
+  BackgroundColor #FAEEDA
+  BorderColor #BA7517
+}
+
+actor "Comercio" as comercio
+actor "Operario\nBodega" as operario
+actor "Canal Externo\n(Shopify)" as canal
+
+cloud "API Gateway" as gateway <<aws>>
+
+queue "Amazon SQS" as sqs
+queue "DLQ" as dlq
+node "AWS Lambda" as lambda <<aws>>
+
+package "Plataforma Bodega Nube" {
+  component "Autenticación" as auth
+  component "Órdenes" as ordenes
+  component "Inventario" as inventario
+  component "Picking y\nDespacho" as picking
+
+  database "DB Auth\n(PostgreSQL)" as db_auth
+  database "DB Órdenes\n(PostgreSQL)" as db_ordenes
+  database "DB Inventario\n(PostgreSQL)" as db_inventario
+  database "DB Picking\n(MongoDB)" as db_picking
+}
+
+comercio --> gateway
+operario --> gateway
+canal --> gateway : webhook
+
+gateway --> auth : síncrono
+gateway --> ordenes : síncrono (consulta)
+gateway --> picking : síncrono
+gateway --> sqs : asíncrono (webhook)
+
+sqs --> lambda
+lambda ..> dlq : reintentos agotados
+
+lambda --> ordenes : crea orden / dedup
+lambda --> inventario : reserva stock
+
+ordenes --> inventario : consulta stock
+
+auth --> db_auth
+ordenes --> db_ordenes
+inventario --> db_inventario
+picking --> db_picking
+
+@enduml

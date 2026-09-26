@@ -12,8 +12,9 @@ Microservicio de órdenes de BodegaNube.
 ## Responsabilidad
 
 - Crear la orden a partir del aviso de venta procesado por la Lambda (`lambda-bodeganube-webhook`), evitando duplicados.
-- Permitir que el comercio consulte únicamente sus propias órdenes y su estado.
-- Notificar a `ms-picking-service` cuando una orden tiene stock reservado y queda disponible para picking.
+- Consultar a `ms-inventario` (síncrono) el stock disponible antes de dejar la orden lista para picking.
+- Permitir que el comercio consulte únicamente sus propias órdenes y su estado (vía API Gateway, síncrono).
+- Dejar disponible la orden para `ms-picking-service` cuando el stock quedó reservado.
 
 ## Endpoints
 
