@@ -51,12 +51,18 @@ gateway --> picking : síncrono
 gateway --> sqs : asíncrono (webhook)
 
 sqs --> lambda
-lambda ..> dlq : reintentos agotados
+lambda ..> dlq : reintentos agotados (fallo técnico)
 
-lambda --> ordenes : crea orden / dedup
-lambda --> inventario : reserva stock
+lambda --> inventario : "1. reserva stock"
+lambda --> ordenes : "2. crea orden / dedup\n(solo si hay stock)"
 
-ordenes --> inventario : consulta stock
+note right of lambda
+  Orquestación secuencial:
+  si Inventario rechaza por falta
+  de stock, la Lambda NO reintenta
+  (no es error técnico) y confirma
+  el mensaje SQS como procesado.
+end note
 
 auth --> db_auth
 ordenes --> db_ordenes

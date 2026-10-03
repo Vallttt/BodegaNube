@@ -11,10 +11,11 @@ Microservicio de órdenes de BodegaNube.
 
 ## Responsabilidad
 
-- Crear la orden a partir del aviso de venta procesado por la Lambda (`lambda-bodeganube-webhook`), evitando duplicados.
-- Consultar a `ms-inventario` (síncrono) el stock disponible antes de dejar la orden lista para picking.
+- Crear la orden a partir del aviso de venta procesado por la Lambda (`lambda-bodeganube-webhook`), **una vez que el stock ya fue reservado** por `ms-inventario`, evitando duplicados.
 - Permitir que el comercio consulte únicamente sus propias órdenes y su estado (vía API Gateway, síncrono).
-- Dejar disponible la orden para `ms-picking-service` cuando el stock quedó reservado.
+- Dejar disponible la orden para `ms-picking-service`.
+
+> Nota de diseño: `ms-ordenes` no llama a `ms-inventario`. La reserva de stock la orquesta la Lambda **antes** de pedir la creación de la orden — así se evita el acoplamiento síncrono ambiguo entre ambos microservicios.
 
 ## Endpoints
 
@@ -27,7 +28,7 @@ POST /ordenes            (uso interno, invocado por la Lambda)
 ## Reglas de negocio
 
 - Un mismo aviso de venta (idempotency key del canal externo) no puede generar dos órdenes.
-- Una orden solo queda disponible para picking si `ms-inventario` confirmó la reserva de stock.
+- Solo se crea la orden si la Lambda confirma que el stock fue reservado.
 - El comercio solo puede ver las órdenes asociadas a su propio identificador de comercio.
 
 ## Roles
@@ -47,7 +48,6 @@ PostgreSQL (`ms_ordenes`).
 DB_URL=
 DB_USERNAME=
 DB_PASSWORD=
-MS_INVENTARIO_URL=
 ```
 
 ## Ejecución local
